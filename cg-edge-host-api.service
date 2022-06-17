@@ -1,0 +1,17 @@
+[Unit]
+Description=Service to control Container requests to host system.
+
+
+[Install]
+WantedBy=multi-user.target
+
+
+[Service]
+Type=simple
+ExecStart=/home/edge/apps/cg-edge-host-api/cg-edge-host-api
+WorkingDirectory=/home/edge/apps/cg-edge-host-api
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=%n

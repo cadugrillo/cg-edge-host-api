@@ -1,0 +1,23 @@
+/////copy files////////
+
+cp cg-edge-host-api /home/edge/apps/cg-edge-host-api
+
+sudo cp cg-edge-host-api.service /etc/systemd/system
+
+///////check if the file was copied///////
+ls /etc/systemd/system | grep cg-edge-host
+
+////////reload systemctl//////////
+sudo systemctl daemon-reload
+
+////////control service///////////
+
+sudo systemctl enable cg-edge-host-api.service
+
+sudo systemctl disable cg-edge-host-api.service
+
+sudo systemctl start cg-edge-host-api.service
+
+sudo systemctl stop cg-edge-host-api.service
+
+sudo systemctl status cg-edge-host-api.service
