@@ -23,6 +23,7 @@ func main() {
 		}
 	})
 
+	r.GET("/host/stats", handlers.GetHostStatsHandler)
 	r.POST("/host/restart", handlers.RestartHostHandler)
 	r.POST("/host/shutdown", handlers.ShutDownHostHandler)
 

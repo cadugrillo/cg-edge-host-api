@@ -17,3 +17,7 @@ func RestartHostHandler(c *gin.Context) {
 func ShutDownHostHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, system.ShutdownHost())
 }
+
+func GetHostStatsHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, system.GetHostStats())
+}
