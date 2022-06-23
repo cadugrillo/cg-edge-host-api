@@ -10,6 +10,22 @@ import (
 	"github.com/shirou/gopsutil/mem"
 )
 
+type HostStats struct {
+	CpuUsage      []float64
+	RamTotal      float64
+	RamUsed       float64
+	RamUsedPct    float64
+	RamAvailable  float64
+	RamFree       float64
+	DiskUsage     float64
+	DiskAvailable float64
+	DiskTotal     float64
+}
+
+var (
+	hostStats HostStats
+)
+
 func RestartHost() string {
 	syscall.Sync()
 	err := syscall.Reboot(syscall.LINUX_REBOOT_CMD_RESTART)
@@ -22,55 +38,54 @@ func ShutdownHost() string {
 	return err.Error()
 }
 
-func GetHostStats() string {
+func GetHostStats() HostStats {
+
 	cpuPercent, err := cpu.Percent(time.Second, true)
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		return hostStats
 	}
-	usedPercent0 := fmt.Sprintf("%.2f", cpuPercent[0])
-	usedPercent1 := fmt.Sprintf("%.2f", cpuPercent[1])
-	//usedPercent2 := fmt.Sprintf("%.2f", cpuPercent[2])
-	//usedPercent3 := fmt.Sprintf("%.2f", cpuPercent[3])
-	fmt.Println("CPU Usage: ", usedPercent0+"%")
-	fmt.Println("CPU Usage: ", usedPercent1+"%")
-	//fmt.Println("CPU Usage: ", usedPercent2+"%")
-	//fmt.Println("CPU Usage: ", usedPercent3+"%")
+	hostStats.CpuUsage = append(hostStats.CpuUsage, cpuPercent...)
 
 	m, err := mem.VirtualMemory()
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		return hostStats
 	}
+	hostStats.RamTotal = getReadableSize(m.Total)
+	hostStats.RamUsed = getReadableSize(m.Used)
+	hostStats.RamUsedPct = m.UsedPercent
+	hostStats.RamAvailable = getReadableSize(m.Available)
+	hostStats.RamFree = getReadableSize(m.Free)
 
-	usedMemory := fmt.Sprintf(
-		"%s (%.2f%%)",
-		getReadableSize(m.Used),
-		m.UsedPercent,
-	)
 	fmt.Println("Ram Total: ", getReadableSize(m.Total))
-	fmt.Println("Ram Used: ", usedMemory)
+	fmt.Println("Ram Used: ", getReadableSize(m.Used))
+	fmt.Println("Ram Used %: ", m.UsedPercent)
 	fmt.Println("Ram Available: ", getReadableSize(m.Available))
 	fmt.Println("Ram Free: ", getReadableSize(m.Free))
 
 	diskUsage, err := disk.Usage("/")
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		return hostStats
 	}
-	usedPercent := fmt.Sprintf("%.2f", diskUsage.UsedPercent)
-	fmt.Println("Disk Usage: ", usedPercent+"%")
-	fmt.Println("Disk Space Available: ", getReadableSize(diskUsage.Free))
 
-	return "done"
+	hostStats.DiskUsage = diskUsage.UsedPercent
+	hostStats.DiskAvailable = getReadableSize(diskUsage.Free)
+	hostStats.DiskTotal = getReadableSize(diskUsage.Total)
+
+	return hostStats
 }
 
-func getReadableSize(sizeInBytes uint64) (readableSizeString string) {
+func getReadableSize(sizeInBytes uint64) (readableSize float64) {
 	var (
 		units = []string{"B", "KB", "MB", "GB", "TB", "PB"}
 		size  = float64(sizeInBytes)
 		i     = 0
 	)
-	for ; i < len(units) && size >= 1024; i++ {
-		size = size / 1024
+	for ; i < len(units) && size >= 1000; i++ {
+		size = size / 1000
 	}
-	readableSizeString = fmt.Sprintf("%.2f %s", size, units[i])
-	return
+
+	return size
 }
