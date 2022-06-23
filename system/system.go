@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"math"
 	"syscall"
 	"time"
 
@@ -45,7 +46,11 @@ func GetHostStats() HostStats {
 		fmt.Println(err.Error())
 		return hostStats
 	}
-	hostStats.CpuUsage = append(hostStats.CpuUsage, cpuPercent...)
+	hostStats.CpuUsage = cpuPercent
+
+	for i := 0; i < len(hostStats.CpuUsage); i++ {
+		hostStats.CpuUsage[i] = math.Round(hostStats.CpuUsage[i]*100) / 100
+	}
 
 	m, err := mem.VirtualMemory()
 	if err != nil {
@@ -54,15 +59,9 @@ func GetHostStats() HostStats {
 	}
 	hostStats.RamTotal = getReadableSize(m.Total)
 	hostStats.RamUsed = getReadableSize(m.Used)
-	hostStats.RamUsedPct = m.UsedPercent
+	hostStats.RamUsedPct = math.Round(m.UsedPercent*100) / 100
 	hostStats.RamAvailable = getReadableSize(m.Available)
 	hostStats.RamFree = getReadableSize(m.Free)
-
-	fmt.Println("Ram Total: ", getReadableSize(m.Total))
-	fmt.Println("Ram Used: ", getReadableSize(m.Used))
-	fmt.Println("Ram Used %: ", m.UsedPercent)
-	fmt.Println("Ram Available: ", getReadableSize(m.Available))
-	fmt.Println("Ram Free: ", getReadableSize(m.Free))
 
 	diskUsage, err := disk.Usage("/")
 	if err != nil {
@@ -70,7 +69,7 @@ func GetHostStats() HostStats {
 		return hostStats
 	}
 
-	hostStats.DiskUsage = diskUsage.UsedPercent
+	hostStats.DiskUsage = math.Round(diskUsage.UsedPercent*100) / 100
 	hostStats.DiskAvailable = getReadableSize(diskUsage.Free)
 	hostStats.DiskTotal = getReadableSize(diskUsage.Total)
 
@@ -87,5 +86,5 @@ func getReadableSize(sizeInBytes uint64) (readableSize float64) {
 		size = size / 1000
 	}
 
-	return size
+	return math.Round(size*100) / 100
 }

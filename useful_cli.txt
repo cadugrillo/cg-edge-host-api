@@ -23,4 +23,4 @@ sudo systemctl stop cg-edge-host-api.service
 sudo systemctl status cg-edge-host-api.service
 
 ///////give permission to execute file//////
-chmod u+x program_name
+chmod u+x /home/edge/apps/cg-edge-host-api/cg-edge-host-api
