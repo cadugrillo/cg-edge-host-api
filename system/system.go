@@ -78,11 +78,11 @@ func GetHostStats() HostStats {
 
 func getReadableSize(sizeInBytes uint64) (readableSize float64) {
 	var (
-		units = []string{"B", "KB", "MB", "GB", "TB", "PB"}
+		units = []string{"KB", "MB"} //, "GB", "TB", "PB}
 		size  = float64(sizeInBytes)
 		i     = 0
 	)
-	for ; i < len(units) && size >= 1000; i++ {
+	for ; i < len(units); i++ { //&& size >= 1000
 		size = size / 1000
 	}
 
